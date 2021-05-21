@@ -30,6 +30,12 @@ def melodyToIntervals(melody):
     return valuesToIntervals(melodyToValues(melody))
 
 
+# Used mostly in node.py and trie.py
+# helper function to convert an interval to the correct index in nextArr
+def ivlToIdx(ivl):
+    return ivl + maxRange
+
+
 # -- Classes -- #
 class MusicalWork:
     def __init__(self, title, artist, date, genre, key, melody):

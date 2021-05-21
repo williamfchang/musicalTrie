@@ -96,13 +96,13 @@ class CompactTrie:
     
     
     def insert(self, mw):
-        print('inserting', mw.title)
-        currNode = self.root
         mI = mw.melodyIntervals # shave off intervals as we process them
+        currNode = self.root[mI[0]] # go to root's corresponding child node
+
         
         # go through intervals (traverse trie)
         while len(mI) > 0:
-            print('mI:', mI)
+            print('mI:', mI, end = '\n  ')
             # update most searched mw for this node, if None
             if not currNode.mostSearched: currNode.mostSearched = mw
             
@@ -111,56 +111,54 @@ class CompactTrie:
             mI_len = 0 if (mI is None) else len(mI)
             cN_len = 0 if (currNode.intervals is None) else len(currNode.intervals)
             firstDiff = firstNonmatching(mI, currNode.intervals)
-            print(f'mI len = {mI_len}, cN len = {cN_len}')
+            print(f'mI_len = {mI_len}, cN_len = {cN_len}', end='\n  ')
             
             # - Case 1: arrays not equal somewhere in the middle
             #           = "split" the node
             if firstDiff != -1:
-                print('Case 1')
+                print('Case 1 (unequal, split node)')
                 # create parent node
                 pNode = CompactNode(mI[:firstDiff], currNode.prev)
                 pNode.nextArr = createNewNextArr(prev=pNode)
                 
                 # update currNode's prev's nextArr to point to new parent node
-                currNode.prev.nextArr[ivlToIdx(mI[0])] = pNode
+                currNode.prev[mI[0]] = pNode
                 
                 # update currNode's prev and intervals
                 currNode.prev = pNode
                 currNode.intervals = currNode.intervals[firstDiff:]
                 
-                # insert currNode into new parent node's nextArr
-                currNodeIdx = ivlToIdx(currNode.intervals[0])
-                pNode.nextArr[currNodeIdx] = currNode # link currNode as a next node
-                
+                # update parent node: insert currNode into new parent node's nextArr, update mostSearched
+                pNode[currNode.intervals[0]] = currNode # link currNode as a next node
                 pNode.mostSearched = currNode.mostSearched
 
                 # *step down trie*, to corresponding child of parent node
                 mI = mI[firstDiff:]
-                currNode = pNode.nextArr[ivlToIdx(mI[0])]
+                currNode = pNode[mI[0]]
             
             # - Case 2: equal, but more remaining ivls than in this node's ivl array
             elif mI_len > cN_len:
                 # Case 2a: we have next array
                 #          = *step down trie*
                 if currNode.nextArr is not None:
-                    print('Case 2a')
+                    print('Case 2a (equal w/ longer mI, and nextArr)')
                     mI = mI[cN_len:]
-                    currNode = currNode.nextArr[ivlToIdx(mI[0])]
+                    currNode = currNode[mI[0]]
 
                 # Case 2b: no next array, currNode not a terminal node
                 #          = extend node's ivls, DONE
                 elif not currNode.terminalValue:
-                    print('Case 2b')
+                    print('Case 2b (equal w/ longer mI, no nextArr but not terminal)')
                     currNode.intervals = mI
                     break
 
                 # Case 2c: no next array, currNode is a terminal node
                 #          = create next array, add child node into array, DONE
                 else:
-                    print('Case 2c')
+                    print('Case 2c (equal w/ longer mI, no nextArr and terminal)')
                     currNode.nextArr = createNewNextArr(prev=currNode)
                     cNode = CompactNode(mI[cN_len:], currNode)
-                    currNode.nextArr[ivlToIdx(mI[0])] = cNode
+                    currNode[mI[cN_len]] = cNode
                     
                     currNode = cNode
                     break
@@ -168,13 +166,13 @@ class CompactTrie:
             # - Case 3: equal, but less remaining ivls than in this nodes' ivl array
             #           = "split" the node, DONE
             elif mI_len < cN_len:
-                print('Case 3')
+                print('Case 3 (equal w/ shorter mI)')
                 # create new parent node
                 pNode = CompactNode(mI, currNode.prev)
                 pNode.nextArr = createNewNextArr(prev=pNode)
                 
                 # update currNode's prev's nextArr to point to new parent node
-                currNode.prev.nextArr[ivlToIdx(mI[0])] = pNode
+                currNode.prev[mI[0]] = pNode
                 
                 # update currNode's prev and intervals
                 currNode.prev = pNode
@@ -190,9 +188,12 @@ class CompactTrie:
                 currNode = pNode
                 break
 
-            # - Case 4: identical. Currently not possible, as this would imply duplicates
+            # - Case 4: identical in elements and size
+            #           = DONE
             # TODO: change terminalValue into array?
-            else: return
+            else:
+                print('Case 4 (identical)')
+                break
         
         
         # currNode now holds terminal node for this musical work

@@ -3,10 +3,6 @@ from node import *
 
 # HELPER FUNCTIONS
 
-# helper function to convert an interval to the correct index in nextArr
-def ivlToIdx(ivl):
-    return ivl + maxRange
-
 # creates new nextArr
 def createNewNextArr(prev=None, nodetype='compact'):
     if nodetype == 'compact':
