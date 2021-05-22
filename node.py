@@ -68,7 +68,12 @@ class CompactNode:
         return out
 
     def __getitem__(self, ivl):
-        return self.nextArr[ivlToIdx(ivl)]
+        if type(ivl) is int: return self.nextArr[ivlToIdx(ivl)]
+        elif type(ivl) is list or type(ivl) is tuple:
+            currNode = self
+            for i in ivl: currNode = currNode.nextArr[ivlToIdx(i)]
+
+            return currNode
     
     def __setitem__(self, ivl, node):
         self.nextArr[ivlToIdx(ivl)] = node
