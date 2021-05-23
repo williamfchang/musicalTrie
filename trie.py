@@ -196,27 +196,36 @@ class CompactTrie:
         # try to find the musical work
         # TODO: for speed reasons, find out how to return the result first,
         #       and only then update mostSearched?
-        mw, exact = self._find(melody)
+        foundMW, isExact, path = self._find(melody)
         
         
         # Determine if any Nodes' mostSearched needs updating
         # if so, traverse trie again, update mostSearched as necessary
-        if mw is not None:
-            mw.searchCount += 1
-            self._updateMostSearched(mw)
+        if foundMW is not None:
+            foundMW.searchCount += 1
+            self._updateMostSearched(foundMW, path)
         
-        return mw
+        return foundMW
     
     # helper function for search to find mw based on melody
     def _find(self, melody):
         '''
-        Returns a musical work, and whether it is an exact match or not
+        Returns foundMW, isExact, path
+        - foundMW: the exact matching musical work, or the mostSearched node that
+            best matches the melody if no exact match exists.
+        - isExact: whether the returned musical work is exact or not
+        - path: the node path (as a list...does it need to be a numpy array?)
+            that was taken to attempt to find musical work.
         '''
+        path = [self.root]
+
         mI = melodyToIntervals(melody) # shave off intervals as we process them
         currNode = self.root[mI[0]] # go to root's corresponding child node
 
         # go through intervals (traverse trie)
         while len(mI) > 0:
+            path.append(currNode) # add to path
+
             # figure out how much we match with current node
             mI_len = 0 if (mI is None) else len(mI)
             cN_len = 0 if (currNode.intervals is None) else len(currNode.intervals)
@@ -225,7 +234,7 @@ class CompactTrie:
             # - Case 1: arrays not equal somewhere in middle
             #           = this node is irrelevant, RETURN previous mostSearched
             if firstDiff != -1:
-                return currNode.prev.mostSearched, False
+                return currNode.prev.mostSearched, False, path[:-1]
             
             # - Case 2: equal, but more reminaing ivls than in this node's ivl array
             elif mI_len > cN_len:
@@ -242,7 +251,7 @@ class CompactTrie:
             # - Case 3: equal, but less remaining ivls than in this nodes' ivl array
             #           = exact is not in trie, but input may be substring, RETURN mostSearched
             elif mI_len < cN_len:
-                return currNode.mostSearched, False
+                return currNode.mostSearched, False, path
             
             # - Case 4: identical in elements and size
             #           = exact match, BREAK to let end logic compute result
@@ -251,19 +260,14 @@ class CompactTrie:
 
         # if we ran out of intervals, check if node is terminal
         # (not sure if this will be ever reached)
-        if currNode.terminalValue: return currNode.terminalValue, True
-        else: return currNode.mostSearched, False # no exact match
+        if currNode.terminalValue: return currNode.terminalValue, True, path
+        else: return currNode.mostSearched, False, path # no exact match
 
     # helper function for search to update mostSearched
-    def _updateMostSearched(self, mw):
-        currNode = self.root
-        mS, sC = currNode.mostSearched, mw.searchCount
-        
-        # go through the intervals (traverse trie)
-        for ivl in mw.melodyIntervals:
-            # update mostSearched if necessary
-            if mS is not None and sC > mS.searchCount:
+    def _updateMostSearched(self, mw, path):        
+        # traverse trie using given path
+        for currNode in path:
+            # update mostSearched if foundMW is more popular than
+            # currNode's previously most popular
+            if mw.searchCount > currNode.mostSearched.searchCount:
                 currNode.mostSearched = mw
-            
-            # go to next (no check as we know mw exists in trie)
-            currNode = currNode.nextArr[ivlToIdx(ivl)]
