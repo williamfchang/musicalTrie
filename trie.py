@@ -129,14 +129,14 @@ class CompactTrie:
                 pNode[currNode.intervals[0]] = currNode # link currNode as a next node
                 pNode.mostSearched = currNode.mostSearched
 
-                # *step down trie*, to corresponding child of parent node
+                # STEP DOWN TRIE, to corresponding child of parent node
                 mI = mI[firstDiff:]
                 currNode = pNode[mI[0]]
             
             # - Case 2: equal, but more remaining ivls than in this node's ivl array
             elif mI_len > cN_len:
                 # Case 2a: we have next array
-                #          = *step down trie*
+                #          = STEP DOWN TRIE
                 if currNode.nextArr is not None:
                     mI = mI[cN_len:]
                     currNode = currNode[mI[0]]
@@ -231,7 +231,7 @@ class CompactTrie:
                 return currNode.prev.mostSearched, False
             
             # - Case 2: equal, but more reminaing ivls than in this node's ivl array
-            #           = *step down trie*
+            #           = STEP DOWN TRIE
             elif mI_len > cN_len:
                 mI = mI[cN_len:]
                 currNode = currNode[mI[0]]
@@ -242,8 +242,8 @@ class CompactTrie:
                 return currNode.mostSearched, False
             
             # - Case 4: identical in elements and size
-            #           = exact match, RETURN
-            else: return currNode.terminalValue, True
+            #           = exact match, BREAK to let end logic compute result
+            else: break
         
 
         # if we didn't reach dead end (but ran out of intervals), check if node is terminal
