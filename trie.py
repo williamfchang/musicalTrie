@@ -67,7 +67,7 @@ class Trie:
         if currNode.terminalValue: return currNode.terminalValue, True
         else: return currNode.mostSearched, False # no exact match
 
-    #helper function for search to update mostSearched
+    # helper function for search to update mostSearched
     def _updateMostSearched(self, mw):
         currNode = self.root
         mS, sC = currNode.mostSearched, mw.searchCount
@@ -217,10 +217,7 @@ class CompactTrie:
 
         # go through intervals (traverse trie)
         while len(mI) > 0:
-            # this node is a dead end
-            if currNode.nextArr is None: return currNode.mostSearched, False
-            
-            # if there are more children nodes...
+            # figure out how much we match with current node
             mI_len = 0 if (mI is None) else len(mI)
             cN_len = 0 if (currNode.intervals is None) else len(currNode.intervals)
             firstDiff = firstNonmatching(mI, currNode.intervals)
@@ -231,10 +228,16 @@ class CompactTrie:
                 return currNode.prev.mostSearched, False
             
             # - Case 2: equal, but more reminaing ivls than in this node's ivl array
-            #           = STEP DOWN TRIE
             elif mI_len > cN_len:
-                mI = mI[cN_len:]
-                currNode = currNode[mI[0]]
+                # Case 2a: we have next array
+                #          = *step down trie*
+                if currNode.nextArr is not None:
+                    mI = mI[cN_len:]
+                    currNode = currNode[mI[0]]
+                
+                # Case 2b: no next array
+                #          = BREAK and let ending logic figure it out
+                else: break
             
             # - Case 3: equal, but less remaining ivls than in this nodes' ivl array
             #           = exact is not in trie, but input may be substring, RETURN mostSearched
@@ -246,12 +249,12 @@ class CompactTrie:
             else: break
         
 
-        # if we didn't reach dead end (but ran out of intervals), check if node is terminal
+        # if we ran out of intervals, check if node is terminal
         # (not sure if this will be ever reached)
         if currNode.terminalValue: return currNode.terminalValue, True
         else: return currNode.mostSearched, False # no exact match
 
-    #helper function for search to update mostSearched
+    # helper function for search to update mostSearched
     def _updateMostSearched(self, mw):
         currNode = self.root
         mS, sC = currNode.mostSearched, mw.searchCount
