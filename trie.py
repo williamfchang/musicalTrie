@@ -96,6 +96,8 @@ class CompactTrie:
     
     
     def insert(self, mw):
+        if self.root.mostSearched is None: self.root.mostSearched = mw # for first insert
+
         mI = mw.melodyIntervals # shave off intervals as we process them
         currNode = self.root[mI[0]] # go to root's corresponding child node
 
