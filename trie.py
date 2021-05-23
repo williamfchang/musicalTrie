@@ -23,7 +23,7 @@ class Trie:
             if currNode.nextArr is None: currNode.nextArr = createNewNextArr(nodetype='default')
             
             # update most searched for this node, if None
-            if not currNode.mostSearched: currNode.mostSearched = mw
+            if currNode.mostSearched is None: currNode.mostSearched = mw
             
             # step down
             currNode = currNode.nextArr[ivlToIdx(ivl)]
@@ -41,7 +41,7 @@ class Trie:
         
         # Determine if any Nodes' mostSearched needs updating
         # if mw is None, don't do anything
-        if not mw: pass
+        if mw is None: pass
         # otherwise, traverse trie again, but update mostSearched as necessary
         else:
             mw.searchCount += 1
@@ -200,10 +200,8 @@ class CompactTrie:
         
         
         # Determine if any Nodes' mostSearched needs updating
-        # if mw is None, don't do anything
-        if not mw: pass
-        # otherwise, traverse trie again, but update mostSearched as necessary
-        else:
+        # if so, traverse trie again, update mostSearched as necessary
+        if mw is not None:
             mw.searchCount += 1
             self._updateMostSearched(mw)
         
@@ -214,16 +212,42 @@ class CompactTrie:
         '''
         Returns a musical work, and whether it is an exact match or not
         '''
-        currNode = self.root
-        
+        mI = melodyToIntervals(melody) # shave off intervals as we process them
+        currNode = self.root[mI[0]] # go to root's corresponding child node
+
         # go through intervals (traverse trie)
-        for ivl in melodyToIntervals(melody):
+        while len(mI) > 0:
             # this node is a dead end
-            if not currNode.nextArr: return currNode.mostSearched, False
-            # if not a dead end, keep going
-            currNode = currNode.nextArr[ivlToIdx(ivl)]
+            if currNode.nextArr is None: return currNode.mostSearched, False
+            
+            # if there are more children nodes...
+            mI_len = 0 if (mI is None) else len(mI)
+            cN_len = 0 if (currNode.intervals is None) else len(currNode.intervals)
+            firstDiff = firstNonmatching(mI, currNode.intervals)
+
+            # - Case 1: arrays not equal somewhere in middle
+            #           = this node is irrelevant, RETURN previous mostSearched
+            if firstDiff != -1:
+                return currNode.prev.mostSearched, False
+            
+            # - Case 2: equal, but more reminaing ivls than in this node's ivl array
+            #           = *step down trie*
+            elif mI_len > cN_len:
+                mI = mI[cN_len:]
+                currNode = currNode[mI[0]]
+            
+            # - Case 3: equal, but less remaining ivls than in this nodes' ivl array
+            #           = exact is not in trie, but input may be substring, RETURN mostSearched
+            elif mI_len < cN_len:
+                return currNode.mostSearched, False
+            
+            # - Case 4: identical in elements and size
+            #           = exact match, RETURN
+            else: return currNode.terminalValue, True
         
-        # if we didn't reach dead end, check if node is terminal
+
+        # if we didn't reach dead end (but ran out of intervals), check if node is terminal
+        # (not sure if this will be ever reached)
         if currNode.terminalValue: return currNode.terminalValue, True
         else: return currNode.mostSearched, False # no exact match
 
