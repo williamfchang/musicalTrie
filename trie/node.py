@@ -1,5 +1,5 @@
 
-from musicalClasses import ivlToIdx
+from trie.musicalClasses import ivlToIdx
 
 class Node:
     def __init__(self, interval, nextArr=None):

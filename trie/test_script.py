@@ -1,4 +1,4 @@
-from trie import *
+from trie.trie import *
 
 
 # Create compact trie

@@ -1,5 +1,5 @@
-from trieUtil import *
-from node import *
+from trie.trieUtil import *
+from trie.node import *
 
 
 class Trie:

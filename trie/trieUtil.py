@@ -1,5 +1,5 @@
-from musicalClasses import *
-from node import *
+from trie.musicalClasses import *
+from trie.node import *
 
 # HELPER FUNCTIONS
 
