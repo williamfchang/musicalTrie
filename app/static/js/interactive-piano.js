@@ -89,6 +89,10 @@ function addNote(keyIndex) {
     // either way, update notes info
     $('#notes-display').append(keyIndexToNote(keyIndex) + ', ');
     keysPressed.push(keyIndex);
+
+    // also update search box
+    var melodySearch = $('#melody-search')
+    melodySearch.val( melodySearch.val() + keyIndexToNote(keyIndex) + ' ' );
 }
 
 // Helper function to get key ID (C4, A4, Eb3, etc.)
