@@ -80,6 +80,11 @@ ul.keyboard li:last-of-type {
 
 
 /* other elements */
+a > h1 {
+    color: black;
+    text-decoration: none;
+}
+
 #activate-piano-keyboard {
     background-color: lightgreen;
 
