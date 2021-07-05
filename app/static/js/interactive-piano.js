@@ -173,13 +173,13 @@ function deleteNoteFromSearchBar() {
 function isInSearchBox() {
     window.inSearchBox = true;
     $('#activate-piano-keyboard').css('background-color', 'lightgrey');
-    $('#activate-piano-keyboard').text('Click me to use keyboard shortcuts for the piano keyboard!');
+    $('#activate-piano-keyboard').text('Keyboard shortcuts for piano keyboard are OFF');
 }
 
 function notInSearchBox() {
     window.inSearchBox = false;
     $('#activate-piano-keyboard').css('background-color', 'lightgreen');
-    $('#activate-piano-keyboard').text('(Keyboard shortcuts are currently activated)');
+    $('#activate-piano-keyboard').text('Keyboard shortcuts for piano keyboard are ON');
 }
 
 

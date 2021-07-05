@@ -45,7 +45,7 @@
     </div>
 
     <!-- Keyboard Content (from melody) -->
-    <div id='activate-piano-keyboard'>(Keyboard shortcuts are currently activated)</div>
+    <div id='activate-piano-keyboard'>Keyboard shortcuts for piano keyboard are ON</div>
     <div class='keyboard-container'></div>
 
     <div id='more-keymaps' class='small-message'>
@@ -74,8 +74,10 @@
         $(document).keyup(function(e) { processComputerKeyup(e) });
 
         // clicks for toggle keyboard shortcuts
-        $("#melody-search").click(function() { isInSearchBox(); });
-        $("#activate-piano-keyboard").click(function() { notInSearchBox(); });
+        // For focus and blur: https://stackoverflow.com/questions/29155179/detecting-click-outside-a-text-field/29155233
+        $("#melody-search").focus(function() { isInSearchBox(); });
+        $("#melody-search").blur(function() { notInSearchBox(); });
+
         $("#switch-keymaps").click(function() { switchKeymaps(); });
     </script>
 
