@@ -54,6 +54,11 @@ function renderKeyboard() {
     return keyboardHTML;
 }
 
+// helper function for adding keymap letters to each key
+function renderKeymap() {
+
+}
+
 function processPianoClick() {
     const keyIndex = $(this).index(); // get the pressed keyboard key
     if (keyIndex < 0 || keyIndex > NUM_OCTAVES * 12) return;
