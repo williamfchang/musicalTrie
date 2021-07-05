@@ -1,10 +1,12 @@
+// audio delay fix for Safari on Mac: https://stackoverflow.com/questions/9811429/html5-audio-tag-on-safari-has-a-delay
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+
+
 // piano keyboard constants
 const NUM_OCTAVES = 3;
 const STARTING_OCTAVE = 3; // keyboard starts on C3
 const KEY_PATTERN = [0,1,0,1,0,0,1,0,1,0,1,0];
-
-
-// global (window) variables include inSearchBox and shiftHeld
 
 
 /* -- KEYMAPS -- */
