@@ -23,8 +23,9 @@
             $('.keyboard li').click(processPianoClick);
         });
 
+        // keydown and keyup events
         $(document).keydown(function(e) { processComputerKeydown(e) });
-        $(document).keyup(function(e) { processComputerKeyup(e) }); 
+        $(document).keyup(function(e) { processComputerKeyup(e) });
     </script>
 </head>
 
@@ -42,21 +43,44 @@
         <h4>Search for melody:</h4>
 
         <form method="post" action="{{page}}">
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Melody" id="melody-search" name="melody" />
+            <!-- <div class="input-group">
+              <input type="text" class="form-control" placeholder="Melody" id="melody-search" name="melody"/>
               <span class="input-group-btn">
                   <button type="submit" class="btn btn-primary btn-md" style="margin: 0 5px;">Search!</button>
               </span>
-            </div>
+            </div> -->
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Melody" id="melody-search" name="melody"/>
+                <div class="input-group-append">
+                    <button class="btn btn-primary btn-md" type="submit">Search!</button>
+                </div>
+              </div>
         </form>
     </div>
 
     <!-- Keyboard Content (from melody) -->
+    <div id='activate-piano-keyboard'>Click me to use keyboard shortcuts for the piano keyboard!</div>
     <div class='keyboard-container'></div>
+
+    <div id='more-keymaps' class='small-message'>
+        More Keymaps:
+        <p>press &lt;Backspace&gt; to delete the previous note</p>
+        <p>hold &lt;Shift&gt; to input sharps</p>
+    </div>
+    <br>
+    <div id='switch-keymaps' class='small-message clickable'>Psst...click me to switch to another keymap!</div>
+
     <!-- <p id='notes-display' class='text-container'>Notes: </p>
     <p id='intervals-display' class='text-container'>Intervals: </p>
-
     <p id='keymap' class='text-container'>keymap: </p> -->
+
+
+    <script>
+        // clicks for toggle keyboard shortcuts
+        $("#melody-search").click(function() { isInSearchBox(); });
+        $("#activate-piano-keyboard").click(function() { notInSearchBox(); });
+        $("#switch-keymaps").click(function() { switchKeymaps(); });
+    </script>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 </div>
