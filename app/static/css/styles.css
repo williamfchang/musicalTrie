@@ -6,7 +6,7 @@ p {
     font-size: 24px;
 }
 
-/* piano layout */
+/* -- piano layout -- */
 .keyboard-container {
     text-align: center;
 }
@@ -17,6 +17,11 @@ p {
 
     list-style-type: none;
     padding-inline-start: 0;
+    width: auto;
+}
+
+.keyboard .octave {
+    display: inline-block;
 }
 
 .keyboard li {
@@ -29,12 +34,14 @@ p {
     box-sizing: content-box;
 }
 
-ul.keyboard li:first-of-type {
+/* round corner of leftmost note */
+ul.keyboard span:first-of-type li:first-of-type {
     border-left-width: 2px;
     border-top-left-radius: 4px;
 }
 
-ul.keyboard li:last-of-type {
+/* round corner of rightmost note */
+ul.keyboard span:last-of-type li:last-of-type {
     border-right-width: 2px;
     border-top-right-radius: 4px;
 }
@@ -79,7 +86,7 @@ ul.keyboard li:last-of-type {
 }
 
 
-/* other elements */
+/* -- other elements -- */
 a > h1 {
     color: black;
     text-decoration: none;

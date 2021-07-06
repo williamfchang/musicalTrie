@@ -3,10 +3,13 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
 
-// piano keyboard constants
+// piano keyboard constants (ground truths)
+const KEY_PATTERN = [0,1,0,1,0,0,1,0,1,0,1,0];
+const KEYS_PER_OCTAVE = 12;
+
+// piano keyboard constants that can be changed
 const NUM_OCTAVES = 3;
 const STARTING_OCTAVE = 3; // keyboard starts on C3
-const KEY_PATTERN = [0,1,0,1,0,0,1,0,1,0,1,0];
 
 
 /* -- KEYMAPS -- */
@@ -40,18 +43,32 @@ window.keymapChar = PARTIAL_KEYMAP_CHAR
 // var intervals = [];
 
 function renderKeyboard() {
+    // open keyboard list
     var keyboardHTML = "<ul class='keyboard'>\n";
 
     // each iteration is an octave
     for (var i = 0; i < NUM_OCTAVES; i++) {
+        // start octave
+        keyboardHTML += "<span class='octave'>\n"
+
         // each iteration is one note
-        for (var j = 0; j < 12; j++) {
+        for (var j = 0; j < KEYS_PER_OCTAVE; j++) {
             const color = KEY_PATTERN[j] ? 'black' : 'white';
-            keyboardHTML += "<li class='" + color + "-key'><p>" + keymapChar[i*12 + j] + "</p></li>\n";
+            keyboardHTML += "<li class='" + color + "-key'><p>" + keymapChar[i*KEYS_PER_OCTAVE + j] + "</p></li>\n";
         }
+
+        // add high C if last iteration
+        if (i == NUM_OCTAVES-1) {
+            keyboardHTML += "<li class='white-key'><p>" + keymapChar[NUM_OCTAVES*KEYS_PER_OCTAVE] + "</p></li>\n";
+        }
+
+        // close octave. Use no newlines after spans: https://stackoverflow.com/questions/5078239/how-do-i-remove-the-space-between-inline-inline-block-elements
+        keyboardHTML += "</span>"
     }
 
-    keyboardHTML += "<li class='white-key'><p>" + keymapChar[NUM_OCTAVES*12] + "</p></li>\n</ul>\n";
+    // close keyboard list
+    keyboardHTML += "</ul>\n";
+
 
     return keyboardHTML;
 }
@@ -62,12 +79,17 @@ function renderKeymap() {
 }
 
 function processPianoClick() {
-    const keyIndex = $(this).index(); // get the pressed keyboard key
-    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * 12) return;
+    const keyIndex = getPianoClickIndex($(this)); // get the pressed keyboard key
+    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return;
     playKeyAudio(keyIndex); // play audio
 
     addNote(keyIndex); // update notes history
 }
+
+function getPianoClickIndex(element) {
+    return element.parent().index() * KEYS_PER_OCTAVE + element.index();
+}
+
 
 function processComputerKeydown(e) {
     // ignore keypress if not interacting with piano
@@ -83,7 +105,7 @@ function processComputerKeydown(e) {
 
     // check if keycode is valid
     const keyIndex = keymap.indexOf(e.code);
-    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * 12) return;
+    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return;
     playKeyAudio(keyIndex); // play audio
 
     addNote(keyIndex); // update notes history
@@ -105,7 +127,7 @@ function processComputerKeyup(e) {
 
     // check if keycode is valid
     const keyIndex = keymap.indexOf(e.code);
-    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * 12) return;
+    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return;
 
     // change style of piano key back to default
     const pianoKey = $('.keyboard').find('li').eq(keyIndex);
@@ -149,9 +171,9 @@ function keyIndexToNote(keyIndex, flatOnly = false) {
     const allKeysSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     
     if (flatOnly || !window.shiftHeld) {
-        return allKeysFlat[keyIndex % 12] + Math.floor(STARTING_OCTAVE + keyIndex / 12);
+        return allKeysFlat[keyIndex % KEYS_PER_OCTAVE] + Math.floor(STARTING_OCTAVE + keyIndex / KEYS_PER_OCTAVE);
     } else {
-        return allKeysSharp[keyIndex % 12] + Math.floor(STARTING_OCTAVE + keyIndex / 12);
+        return allKeysSharp[keyIndex % KEYS_PER_OCTAVE] + Math.floor(STARTING_OCTAVE + keyIndex / KEYS_PER_OCTAVE);
     }
 }
 
