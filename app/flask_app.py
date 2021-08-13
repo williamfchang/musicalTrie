@@ -8,7 +8,7 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 
 # Imports
-from flask import Flask, request, render_template
+from flask import Flask, jsonify, render_template, request
 from trie.trie import *
 
 
@@ -49,22 +49,46 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
-    # no info yet
-    if request.method == 'GET':
-        return render_template('search.html')
-    
-    # user has now submitted info
+    return render_template('search.html')
+
+
+@app.route('/_melody_search')
+def melody_search():
+    melody = request.args.get('melody', '', type=str)
+
+    line1 = "(Not found)"
+    line2 = melody
+
+    # check if input is valid, only search if valid
+    wrongAtIdx = validMelody(melody)
+
+    # Case 1 (-2): invalid, one or less notes
+    if wrongAtIdx == -2:
+        line1 = "Enter more than one note!"
+    # Case 2 (0+): invalid at given index
+    elif wrongAtIdx >= 0:
+        line1 = "Fix the error(s) below:"
+    # Case 3 (-1): valid
     else:
-        # search trie for user inputted melody
-        melody = request.form["melody"]
         found_mw = ct.search(melody)
-        
-        line1, line2 = str(found_mw).split('\n')
+        if found_mw: line1, line2 = str(found_mw).split('\n')
+    
+    # return
+    return jsonify(title=line1, melody=line2, wrongAtIdx=wrongAtIdx)
 
-        return render_template('search_post.html', found_mw_title=line1, found_mw_melody=line2)
+@app.route('/_add_vote')
+def add_vote():
+    vote = request.args.get('vote', 0, type=int)
 
+    # update vote, also update most searched for each node
+    if ct.lastFoundMW: ct.lastFoundMW.searchCount += vote
+    ct._updateMostSearched(ct.lastFoundMW, ct.lastFoundMWPath)
 
+    # determine title to return to html
+    new_title = ''
+    if ct.lastFoundMW: new_title = str(ct.lastFoundMW).split('\n')[0]
 
+    return jsonify(title=new_title)
 
 
 if __name__ == '__main__':

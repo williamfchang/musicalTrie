@@ -3,6 +3,7 @@ import numpy as np
 # -- Basic definitions - #
 notes = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
 accidentals = {'bb': -2, 'd': -2, 'b': -1, 'n': 0, '#': 1, '##': 2, 'x': 2}
+octavesStr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] # for validMelody function
 
 maxRange = 96 - 9 # =87, the range from A0 to C8
 

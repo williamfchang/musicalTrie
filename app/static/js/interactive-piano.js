@@ -35,9 +35,12 @@ const PARTIAL_KEYMAP_CHAR = ['', '', '', '', '', '', '', '', '', '', '', '',
 
 
 // SET DEFAULT KEYMAP
-window.keymap = PARTIAL_KEYMAP
-window.keymapChar = PARTIAL_KEYMAP_CHAR
+window.keymap = PARTIAL_KEYMAP;
+window.keymapChar = PARTIAL_KEYMAP_CHAR;
 
+
+// variables
+var lastWrongIdx = -1;
 
 // var keysPressed = [];
 // var intervals = [];
@@ -49,7 +52,7 @@ function renderKeyboard() {
     // each iteration is an octave
     for (var i = 0; i < NUM_OCTAVES; i++) {
         // start octave
-        keyboardHTML += "<span class='octave'>\n"
+        keyboardHTML += "<span class='octave'>\n";
 
         // each iteration is one note
         for (var j = 0; j < KEYS_PER_OCTAVE; j++) {
@@ -63,7 +66,7 @@ function renderKeyboard() {
         }
 
         // close octave. Use no newlines after spans: https://stackoverflow.com/questions/5078239/how-do-i-remove-the-space-between-inline-inline-block-elements
-        keyboardHTML += "</span>"
+        keyboardHTML += "</span>";
     }
 
     // close keyboard list
@@ -73,24 +76,63 @@ function renderKeyboard() {
     return keyboardHTML;
 }
 
-// helper function for adding keymap letters to each key
-function renderKeymap() {
 
+
+// function for searching for melody (AJAX) and updating HTML
+function searchMelodyAndUpdate() {
+    // RESET ELEMENTS:
+    $("#results-title").css('background-color', ''); // reset results jumbotron to grey
+    $("#upvote-button").removeClass('btn-primary').addClass('btn-light'); // reset upvote button
+
+    // use AJAX to get answer from python
+    $.getJSON($SCRIPT_ROOT + '/_melody_search', {
+        melody: $("#melody-search").val()
+    }, function(data) {
+        // keep track of last wrongAtIdx
+        lastWrongIdx = data.wrongAtIdx;
+
+        // update title
+        $("#results-title").html(data.title);
+
+        // update melody subtitle: start by setting a default value for melody HTML
+        var melodyHTML = data.melody;
+
+        // check if wrong at an index
+        if (data.wrongAtIdx >= 0) {
+            melodyHTML = data.melody.substr(0, data.wrongAtIdx);
+            melodyHTML += "<span class='red-highlight'>";
+            melodyHTML += data.melody.substr(data.wrongAtIdx);
+            melodyHTML += "</span>";
+        }
+
+        // assign to HTML element
+        $("#results-melody").html(melodyHTML);
+    });
 }
 
-function processPianoClick() {
-    const keyIndex = getPianoClickIndex($(this)); // get the pressed keyboard key
-    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return;
+
+// GENERAL FUNCTION that processes when a piano key is activated
+// (whether by click or keyboard shortcut)
+function processPianoKeyActivated(keyIndex) {
+    // check if keycode is valid
+    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return false;
     playKeyAudio(keyIndex); // play audio
 
-    addNote(keyIndex); // update notes history
+    addNote(keyIndex); // update notes history and input box
+    searchMelodyAndUpdate(); // update result box
+
+    return true;
 }
 
-function getPianoClickIndex(element) {
-    return element.parent().index() * KEYS_PER_OCTAVE + element.index();
+
+// function that runs when user clicks on a piano key
+function processPianoClick() {
+    // get the pressed keyboard key, then pass to key activated function
+    const keyIndex = $(this).parent().index() * KEYS_PER_OCTAVE + $(this).index();
+    processPianoKeyActivated(keyIndex);
 }
 
-
+// function that is called when a button on computer keyboard is pressed
 function processComputerKeydown(e) {
     // ignore keypress if not interacting with piano
     if (window.inSearchBox) return;
@@ -105,10 +147,7 @@ function processComputerKeydown(e) {
 
     // check if keycode is valid
     const keyIndex = keymap.indexOf(e.code);
-    if (keyIndex < 0 || keyIndex > NUM_OCTAVES * KEYS_PER_OCTAVE) return;
-    playKeyAudio(keyIndex); // play audio
-
-    addNote(keyIndex); // update notes history
+    if (!processPianoKeyActivated(keyIndex)) return;
 
     // change style of piano key
     const pianoKey = $('.keyboard').find('li').eq(keyIndex);
@@ -116,6 +155,7 @@ function processComputerKeydown(e) {
     else pianoKey.addClass('black-key-active');
 }
 
+// function that is called when a button on computer keyboard is released
 function processComputerKeyup(e) {
     // ignore keypress if not interacting with piano
     if (window.inSearchBox) return;
@@ -188,6 +228,7 @@ function deleteNoteFromSearchBar() {
     var inputVal = $('#melody-search').val();
     var i = inputVal.lastIndexOf(' ');
     $('#melody-search').val(inputVal.substr(0,i));
+    searchMelodyAndUpdate();
 }
 
 
@@ -218,4 +259,27 @@ function switchKeymaps() {
 
     // re-render keyboard
     $('.keyboard-container').html(renderKeyboard());
+}
+
+// Function to update background color of the results jumbotron when search is pressed
+function highlightResult() {
+    var color = (lastWrongIdx == -1) ? "lightgreen" : "lightcoral";
+    $("#results-title").css('background-color', color);
+}
+
+// processes an upvote
+function processUpvote() {
+    const upBtn = $('#upvote-button');
+
+    // toggle appearance
+    upBtn.toggleClass('btn-light').toggleClass('btn-primary');
+    
+    // determine if we are upvoting or removing upvote
+    const voteToAdd = (upBtn.hasClass('btn-primary')) ? 1 : -1;
+
+    $.getJSON($SCRIPT_ROOT + '/_add_vote', {
+        vote: voteToAdd
+    }, function(data) {
+        if (data.title.length > 0) $("#results-title").html(data.title);
+    });
 }

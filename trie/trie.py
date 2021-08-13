@@ -82,11 +82,20 @@ class Trie:
             currNode = currNode.nextArr[ivlToIdx(ivl)]
 
 
+
+
+
+
+
+
 class CompactTrie:
     def __init__(self):
         self.root = CompactNode(None, None)
         self.root.nextArr = createNewNextArr(self.root)
         self.numItems = 0
+
+        self.lastFoundMW = None
+        self.lastFoundMWPath = None
         
     def __str__(self):
         return f'Compact Trie with {self.numItems} items'
@@ -199,12 +208,14 @@ class CompactTrie:
         # TODO: for speed reasons, find out how to return the result first,
         #       and only then update mostSearched?
         foundMW, isExact, path = self._find(melody)
-        
+        self.lastFoundMW = foundMW
+        self.lastFoundMWPath = path
+
         
         # Determine if any Nodes' mostSearched needs updating
         # if so, traverse trie again, update mostSearched as necessary
         if foundMW is not None:
-            foundMW.searchCount += 1
+            # foundMW.searchCount += 1
             self._updateMostSearched(foundMW, path)
         
         return foundMW
