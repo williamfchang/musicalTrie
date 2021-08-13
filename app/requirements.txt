@@ -1,2 +1,4 @@
 Flask
 numpy
+flask-sqlalchemy
+# flask-migrate
