@@ -6,9 +6,12 @@ PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-
-# Imports
+# Main imports
 from flask import Flask, jsonify, render_template, request
+from config import Config
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
 from trie.trie import *
 
 
@@ -46,6 +49,11 @@ print('this only executes once right?')
 
 # -- FLASK -- #
 app = Flask(__name__)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
