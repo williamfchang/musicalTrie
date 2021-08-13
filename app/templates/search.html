@@ -28,33 +28,37 @@
     </div>
  
 
-    <!-- Search Content -->
-    <div class="jumbotron">
-        <h4>Search for melody</h4>
+    <div class="row">
 
-        <div class="input-group">
-            <input type="text" class="form-control" placeholder="Melody" id="melody-search" name="melody"/>
-            <div class="input-group-append">
-                <button class="btn btn-primary btn-md" id="search-button">Search!</button>
+        <!-- Search Content -->
+        <div class="col-lg-6"><div class="jumbotron">
+            <h4>Search for melody</h4>
+
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Melody" id="melody-search" name="melody"/>
+                <div class="input-group-append">
+                    <button class="btn btn-primary btn-md" id="search-button">Search!</button>
+                </div>
             </div>
+        </div></div>
+
+        <!-- Results Content -->
+        <div class="col-lg-6"><div class="jumbotron" id="results-jumbotron">
+            <h4>Top Result <span class="btn btn-light btn-sm" id="upvote-button">+1</span></h4>
+
+            <div class="card">
+                <div class="card-header" id="results-title"></div>
+                <ul class="list-group list-group-flush">
+                <li class="list-group-item" id="results-melody"></li>
+                </ul>
             </div>
-    </div>
+        </div></div>
 
-    <!-- Results Content -->
-    <div class="jumbotron" id="results-jumbotron">
-        <h4>Top Result <span class="btn btn-light btn-sm" id="upvote-button">+1</span></h4>
-
-        <div class="card" style="width: 80%;">
-            <div class="card-header" id="results-title"></div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" id="results-melody"></li>
-            </ul>
-          </div>
     </div>
 
     <!-- Keyboard Content (from melody) -->
-    <div id='activate-piano-keyboard'>Keyboard shortcuts for piano keyboard are ON</div>
     <div class='keyboard-container'></div>
+    <div id='activate-piano-keyboard'>Keyboard shortcuts for piano keyboard are ON</div>
 
     <div id='more-keymaps' class='small-message'>
         More Keymaps:
